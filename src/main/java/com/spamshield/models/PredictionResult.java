@@ -11,7 +11,15 @@ public class PredictionResult {
         this.hamScore = hamScore;
     }
 
-    public String getPrediction() { return prediction; }
-    public double getSpamScore() { return spamScore; }
-    public double getHamScore() { return hamScore; }
+    public String getPrediction() {
+        return prediction;
+    }
+
+    public double getSpamScore() {
+        return spamScore;
+    }
+
+    public double getHamScore() {
+        return hamScore;
+    }
 }

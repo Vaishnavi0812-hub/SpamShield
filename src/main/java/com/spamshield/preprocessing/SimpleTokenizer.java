@@ -8,10 +8,15 @@ public class SimpleTokenizer implements Tokenizer {
 
     @Override
     public List<String> tokenize(String text) {
-        if (text == null) return List.of();
-        // lower, remove non-letters and collapse spaces
+        if (text == null) {
+            return List.of();
+        }
+        // convert to lowercase, remove non-letters, split on whitespace
         String cleaned = text.toLowerCase().replaceAll("[^a-z\\s]", " ").replaceAll("\\s+", " ").trim();
-        if (cleaned.isEmpty()) return List.of();
-        return new ArrayList<>(Arrays.asList(cleaned.split(" ")));
+        if (cleaned.isEmpty()) {
+            return List.of();
+        }
+        String[] parts = cleaned.split(" ");
+        return new ArrayList<>(Arrays.asList(parts));
     }
 }

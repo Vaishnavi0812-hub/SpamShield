@@ -9,11 +9,11 @@ public class Email {
         this.text = text;
     }
 
-    public String getLabel() { return label; }
-    public String getText() { return text; }
+    public String getLabel() {
+        return label;
+    }
 
-    @Override
-    public String toString() {
-        return "Email{" + "label='" + label + '\'' + ", text='" + text + '\'' + '}';
+    public String getText() {
+        return text;
     }
 }

@@ -11,11 +11,6 @@ import java.util.Set;
 import com.spamshield.preprocessing.Tokenizer;
 import com.spamshield.utils.TextCleaner;
 
-/**
- * Simple TF-IDF vectorizer:
- * - fit(documents) computes idf
- * - transform(document) returns term -> tf-idf
- */
 public class TFIDFVectorizer {
 
     private final Tokenizer tokenizer;
@@ -39,14 +34,19 @@ public class TFIDFVectorizer {
                 if (TextCleaner.isStopword(t)) continue;
                 seen.add(t);
             }
-            for (String s : seen) docFreq.put(s, docFreq.getOrDefault(s, 0) + 1);
+            for (String term : seen) {
+                docFreq.put(term, docFreq.getOrDefault(term, 0) + 1);
+            }
         }
-        for (Map.Entry<String, Integer> e : docFreq.entrySet()) {
-            String term = e.getKey();
-            double val = Math.log((double) N / (1 + e.getValue()));
-            idf.put(term, val);
+
+        for (Map.Entry<String, Integer> entry : docFreq.entrySet()) {
+            String term = entry.getKey();
+            double df = entry.getValue();
+            double idfValue = Math.log((double) N / (1 + df));
+            idf.put(term, idfValue);
             vocabulary.add(term);
         }
+
         fitted = true;
     }
 
@@ -60,15 +60,23 @@ public class TFIDFVectorizer {
             tf.put(t, tf.getOrDefault(t, 0) + 1);
             total++;
         }
+
         Map<String, Double> tfidf = new HashMap<>();
         if (total == 0) return tfidf;
-        for (Map.Entry<String, Integer> e : tf.entrySet()) {
-            String term = e.getKey();
-            double termTf = (double) e.getValue() / total;
-            double termIdf = idf.getOrDefault(term, Math.log(1 + 1.0));
+
+        for (Map.Entry<String, Integer> entry : tf.entrySet()) {
+            String term = entry.getKey();
+            double termTf = (double) entry.getValue() / total;
+            double termIdf = idf.getOrDefault(term, Math.log(documentsCountFallback()));
             tfidf.put(term, termTf * termIdf);
         }
+
         return tfidf;
+    }
+
+    private double documentsCountFallback() {
+        // fallback idf for unseen term
+        return Math.log(1 + 1.0);
     }
 
     public Set<String> getVocabulary() {

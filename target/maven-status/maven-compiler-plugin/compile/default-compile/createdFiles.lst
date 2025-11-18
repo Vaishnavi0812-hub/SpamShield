@@ -1,2 +1,14 @@
 com\spamshield\App.class
 com\spamshield\api\ApiServer.class
+com\spamshield\models\PredictionResult.class
+com\spamshield\api\EmailController.class
+com\spamshield\ml\EmailDatasetLoader.class
+com\spamshield\utils\FileUtils.class
+com\spamshield\ml\NaiveBayesClassifier.class
+com\spamshield\preprocessing\SimpleTokenizer.class
+com\spamshield\preprocessing\Tokenizer.class
+com\spamshield\ml\TFIDFVectorizer.class
+com\spamshield\models\Email.class
+com\spamshield\ui\MainUI.class
+com\spamshield\ml\Classifier.class
+com\spamshield\utils\TextCleaner.class
