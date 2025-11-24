@@ -31,6 +31,7 @@ public class NaiveBayesClassifier extends Classifier {
 
     @Override
     public void train(String datasetPath) {
+
         List<Email> data;
         try {
             data = EmailDatasetLoader.load(datasetPath);
@@ -38,13 +39,15 @@ public class NaiveBayesClassifier extends Classifier {
             throw new RuntimeException("Could not load dataset: " + e.getMessage(), e);
         }
 
-        // Fit vectorizer
-         vectorizer.fit(
-        data.stream().map(Email::getText).toList()
-    );
+        // Fit TF-IDF vectorizer
+        vectorizer.fit(
+            data.stream().map(Email::getText).toList()
+        );
 
+        // Count tokens
         for (Email e : data) {
             List<String> tokens = tokenizer.tokenize(TextCleaner.clean(e.getText()));
+
             if (e.getLabel().equals("spam")) {
                 spamDocs++;
                 for (String t : tokens) {
@@ -62,39 +65,48 @@ public class NaiveBayesClassifier extends Classifier {
             }
         }
 
-        // Build vocab
+        // Build full vocabulary size
         Set<String> vocab = new java.util.HashSet<>();
         vocab.addAll(spamCounts.keySet());
         vocab.addAll(hamCounts.keySet());
         vocabSize = vocab.size();
-
     }
 
     @Override
     public PredictionResult predictWithScores(String text) {
+
         Map<String, Double> tfidf = vectorizer.transform(text);
 
-        double priorSpam = Math.log((double) (spamDocs + 1) / (spamDocs + hamDocs + 2));
-        double priorHam  = Math.log((double) (hamDocs + 1) / (spamDocs + hamDocs + 2));
+        // Priors
+        double priorSpam = Math.log((double)(spamDocs + 1) / (spamDocs + hamDocs + 2));
+        double priorHam  = Math.log((double)(hamDocs + 1) / (spamDocs + hamDocs + 2));
 
         double spamScore = priorSpam;
         double hamScore  = priorHam;
 
+        // Likelihood
         for (Map.Entry<String, Double> entry : tfidf.entrySet()) {
             String term = entry.getKey();
             double weight = entry.getValue();
+
             double countSpam = spamCounts.getOrDefault(term, 0);
             double countHam  = hamCounts.getOrDefault(term, 0);
 
             // Laplace smoothing
-            double probTermSpam = (countSpam + 1.0) / (totalSpamTokens + vocabSize + 1.0);
-            double probTermHam  = (countHam + 1.0) / (totalHamTokens + vocabSize + 1.0);
+            double probSpam = (countSpam + 1.0) / (totalSpamTokens + vocabSize + 1.0);
+            double probHam  = (countHam + 1.0) / (totalHamTokens + vocabSize + 1.0);
 
-            spamScore += weight * Math.log(probTermSpam);
-            hamScore  += weight * Math.log(probTermHam);
+            spamScore += weight * Math.log(probSpam);
+            hamScore  += weight * Math.log(probHam);
         }
 
         String prediction = spamScore > hamScore ? "spam" : "ham";
+
         return new PredictionResult(prediction, spamScore, hamScore);
+    }
+
+    // --- The method your API uses ---
+    public String predict(String text) {
+        return predictWithScores(text).getPrediction();
     }
 }
